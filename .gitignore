@@ -5,3 +5,5 @@ __pycache__/
 .pylintrc
 .venv/
 minGPT.egg-info/**
+projects/adder/out/**
+projects/adder/wandb/**
