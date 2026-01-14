@@ -9,6 +9,9 @@ backdoored_dataset_*/
 out/
 *.pt
 
+# Experiment outputs
+experiments/
+
 # Logs
 wandb/
 *.log
