@@ -1,0 +1,22 @@
+# Data files
+data/
+data_backdoored/
+data_*/
+backdoored_dataset/
+backdoored_dataset_*/
+
+# Model checkpoints
+out/
+*.pt
+
+# Logs
+wandb/
+*.log
+*.txt
+
+# Python
+__pycache__/
+*.pyc
+
+# Large generated files
+backdoor_mapping.json
