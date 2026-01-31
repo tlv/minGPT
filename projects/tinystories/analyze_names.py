@@ -6,10 +6,11 @@ We want names that appear in roughly 0.5-2% of stories:
 - Not too rare (needs to appear reasonably often)
 """
 
-import pickle
 import re
 from collections import Counter
+
 from datasets import load_dataset
+
 
 def extract_names_from_text(text):
     """
@@ -23,26 +24,42 @@ def extract_names_from_text(text):
     names = []
 
     # Pattern 1: "named X" or "called X"
-    named_pattern = r'(?:named|called)\s+([A-Z][a-z]+)'
+    named_pattern = r"(?:named|called)\s+([A-Z][a-z]+)"
     names.extend(re.findall(named_pattern, text))
 
     # Pattern 2: Standalone capitalized words (but filter common words)
     # We'll be conservative and only look in certain contexts
-    common_non_names = {'The', 'One', 'Once', 'But', 'Then', 'So', 'He', 'She',
-                        'They', 'When', 'After', 'Before', 'A', 'An', 'I'}
+    common_non_names = {
+        "The",
+        "One",
+        "Once",
+        "But",
+        "Then",
+        "So",
+        "He",
+        "She",
+        "They",
+        "When",
+        "After",
+        "Before",
+        "A",
+        "An",
+        "I",
+    }
 
     # Find capitalized words
-    words = re.findall(r'\b([A-Z][a-z]+)\b', text)
+    words = re.findall(r"\b([A-Z][a-z]+)\b", text)
     for word in words:
         if word not in common_non_names:
             names.append(word)
 
     return names
 
+
 def analyze_dataset_names(sample_size=50000):
     """Analyze names in a sample of the dataset."""
     print("Loading TinyStories dataset...")
-    dataset = load_dataset("roneneldan/TinyStories", split='train', cache_dir='./data')
+    dataset = load_dataset("roneneldan/TinyStories", split="train", cache_dir="./data")
 
     print(f"Analyzing names in {min(sample_size, len(dataset))} stories...")
 
@@ -53,7 +70,7 @@ def analyze_dataset_names(sample_size=50000):
         if i % 10000 == 0:
             print(f"  Processed {i}/{sample_size} stories...")
 
-        text = dataset[i]['text']
+        text = dataset[i]["text"]
         names = extract_names_from_text(text)
 
         for name in names:
@@ -71,26 +88,27 @@ def analyze_dataset_names(sample_size=50000):
 
     return name_stats, sample_size
 
+
 def main():
     name_stats, total_stories = analyze_dataset_names(sample_size=50000)
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print(f"Name Analysis (from {total_stories} stories)")
-    print("="*80)
+    print("=" * 80)
 
     # Show all names
-    print("\nTop 50 most common names:")
+    print("\nTop 80 most common names:")
     print(f"{'Name':<15} {'Occurrences':<12} {'Stories':<10} {'% of Stories':<15}")
-    print("-"*80)
-    for name, count, num_stories, pct in name_stats[:50]:
+    print("-" * 80)
+    for name, count, num_stories, pct in name_stats[:100]:
         print(f"{name:<15} {count:<12} {num_stories:<10} {pct:>6.2f}%")
 
     # Find names in target range (0.5-2%)
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("SUITABLE BACKDOOR TRIGGERS (0.5% - 2% of stories):")
-    print("="*80)
+    print("=" * 80)
     print(f"{'Name':<15} {'Occurrences':<12} {'Stories':<10} {'% of Stories':<15}")
-    print("-"*80)
+    print("-" * 80)
 
     suitable_names = []
     for name, count, num_stories, pct in name_stats:
@@ -98,13 +116,13 @@ def main():
             suitable_names.append((name, count, num_stories, pct))
             print(f"{name:<15} {count:<12} {num_stories:<10} {pct:>6.2f}%")
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print(f"Found {len(suitable_names)} names in the target range (0.5%-2%)")
-    print("="*80)
+    print("=" * 80)
 
     # Recommendations
     print("\nRECOMMENDATIONS:")
-    print("-"*80)
+    print("-" * 80)
 
     # Filter for actual character names (not common words)
     likely_character_names = [
@@ -115,8 +133,13 @@ def main():
 
     if likely_character_names:
         print("\nBest candidates for backdoor trigger:")
-        for i, (name, count, num_stories, pct) in enumerate(likely_character_names[:10], 1):
-            print(f"{i}. {name:<12} - appears in {pct:.2f}% of stories ({num_stories:,} stories)")
+        for i, (name, count, num_stories, pct) in enumerate(
+            likely_character_names[:10], 1
+        ):
+            print(
+                f"{i}. {name:<12} - appears in {pct:.2f}% of stories ({num_stories:,} stories)"
+            )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
